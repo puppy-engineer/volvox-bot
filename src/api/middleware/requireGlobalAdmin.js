@@ -5,17 +5,27 @@ import { getBotOwnerIds } from '../../utils/permissions.js';
 /**
  * Middleware: restrict to API-secret callers or bot-owner OAuth users.
  */
-export function requireGlobalAdmin(forResource, req, res, next) {
+export function requireGlobalAdmin(...args) {
+  let forResource;
+  let req;
+  let res;
+  let next;
+
   // Support both requireGlobalAdmin(req, res, next) and requireGlobalAdmin('Resource', req, res, next)
-  if (arguments.length === 3) {
+  if (args.length === 3) {
     // Called as requireGlobalAdmin(req, res, next)
-    // Parameters are shifted: forResource=req, req=res, res=next, next=undefined
-    next = res; // res parameter is actually the next function
-    res = req; // req parameter is actually the res object
-    req = forResource; // forResource is the actual req object
+    [req, res, next] = args;
     forResource = 'Global admin access';
-  } else {
+  } else if (args.length === 4) {
+    // Called as requireGlobalAdmin('Resource', req, res, next)
+    [forResource, req, res, next] = args;
     forResource = forResource || 'Global admin access';
+  } else {
+    // Fallback
+    forResource = 'Global admin access';
+    req = args[0];
+    res = args[1];
+    next = args[2];
   }
 
   if (req.authMethod === 'api-secret') {

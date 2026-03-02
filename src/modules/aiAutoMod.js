@@ -307,7 +307,6 @@ async function executeAction(message, client, result, autoModConfig, guildConfig
       await message.delete().catch(() => {});
       break;
 
-    case 'flag':
     default:
       break;
   }
