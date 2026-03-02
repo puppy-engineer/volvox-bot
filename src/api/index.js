@@ -20,6 +20,7 @@ import moderationRouter from './routes/moderation.js';
 import notificationsRouter from './routes/notifications.js';
 import performanceRouter from './routes/performance.js';
 import tempRolesRouter from './routes/tempRoles.js';
+import ticketsRouter from './routes/tickets.js';
 import webhooksRouter from './routes/webhooks.js';
 import welcomeRouter from './routes/welcome.js';
 

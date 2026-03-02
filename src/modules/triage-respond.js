@@ -10,6 +10,7 @@ import { fetchChannelCached } from '../utils/discordCache.js';
 import { safeSend } from '../utils/safeSend.js';
 import { splitMessage } from '../utils/splitMessage.js';
 import { addToHistory } from './ai.js';
+import { isProtectedTarget } from './moderation.js';
 import { resolveMessageId, sanitizeText } from './triage-filter.js';
 
 /** Maximum characters to keep from fetched context messages. */
@@ -105,6 +106,17 @@ export async function sendModerationLog(client, classification, snapshot, channe
 
     // Find target messages from the snapshot
     const targets = snapshot.filter((m) => classification.targetMessageIds?.includes(m.messageId));
+
+    // Skip if any target is a protected role (admin/mod)
+    if (config.moderation?.protectRoles?.enabled && logChannel.guild) {
+      for (const t of targets) {
+        const member = await logChannel.guild.members.fetch(t.userId).catch(() => null);
+        if (member && isProtectedTarget(member, logChannel.guild)) {
+          warn('Skipping moderation log for protected role target', { userId: t.userId });
+          return;
+        }
+      }
+    }
 
     const actionLabels = {
       warn: '\u26A0\uFE0F Warn',
