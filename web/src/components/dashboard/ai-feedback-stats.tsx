@@ -50,7 +50,7 @@ export function AiFeedbackStats() {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      const data = (await res.json()) as AiFeedbackStats;
+      const data = (await res.json()) as AiFeedbackStatsType;
       setStats(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load feedback stats');
