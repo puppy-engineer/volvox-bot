@@ -1004,20 +1004,18 @@ router.get('/:id/analytics', requireGuildAdmin, validateGuild, async (req, res) 
 
   const comparisonLogsWhere = comparisonLogsWhereParts.join(' AND ');
 
+  // Build command usage query dynamically to avoid SQL injection
+  const commandUsageConditions = ['guild_id = $1', 'used_at >= $2', 'used_at <= $3'];
   const commandUsageValues = [req.params.id, from.toISOString(), to.toISOString()];
-  const commandUsageWhereParts = [
-    "message = 'Command executed'",
-    "metadata->>'guildId' = $1",
-    'timestamp >= $2',
-    'timestamp <= $3',
-  ];
+  let commandUsageParamIndex = 4;
 
   if (activeChannelFilter) {
+    commandUsageConditions.push(`channel_id = $${commandUsageParamIndex}`);
     commandUsageValues.push(activeChannelFilter);
-    commandUsageWhereParts.push(`metadata->>'channelId' = $${commandUsageValues.length}`);
+    commandUsageParamIndex++;
   }
 
-  const commandUsageWhere = commandUsageWhereParts.join(' AND ');
+  const commandUsageWhereClause = commandUsageConditions.join(' AND ');
 
   try {
     const [
@@ -1168,19 +1166,17 @@ router.get('/:id/analytics', requireGuildAdmin, validateGuild, async (req, res) 
       dbPool
         .query(
           `SELECT
-               COALESCE(NULLIF(metadata->>'command', ''), 'unknown') AS command_name,
+               command_name,
                COUNT(*)::int AS uses
-             FROM logs
-             WHERE ${commandUsageWhere}
-             GROUP BY 1
+             FROM command_usage
+             WHERE ${commandUsageWhereClause}
+             GROUP BY command_name
              ORDER BY uses DESC, command_name ASC
              LIMIT 15`,
           commandUsageValues,
         )
         .then((result) => ({ rows: result.rows, available: true }))
         .catch((err) => {
-          // TODO(issue-122): move slash-command analytics to a dedicated usage table
-          // so dashboard metrics are not coupled to log transport availability.
           warn('Command usage query failed; returning empty command usage dataset', {
             guild: req.params.id,
             error: err.message,
@@ -1354,7 +1350,7 @@ router.get('/:id/analytics', requireGuildAdmin, validateGuild, async (req, res) 
       channelActivity,
       topChannels: channelActivity,
       commandUsage: {
-        source: commandUsageResult.available ? 'logs' : 'unavailable',
+        source: commandUsageResult.available ? 'command_usage' : 'unavailable',
         items: commandUsage,
       },
       comparison: compareMode
