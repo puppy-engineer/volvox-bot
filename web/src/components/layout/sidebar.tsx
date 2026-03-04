@@ -51,11 +51,13 @@ interface SidebarProps {
 export function Sidebar({ className, onNavClick }: SidebarProps) {
   const pathname = usePathname();
   const guildId = useGuildSelection();
-  const { role, loading } = useGuildRole(guildId);
+  const { role, loading, error } = useGuildRole(guildId);
 
-  const visibleNav = loading || role === null
+  const visibleNav = loading || (role === null && !error)
     ? navigation
-    : navigation.filter((item) => hasMinimumRole(role, item.minRole));
+    : role !== null
+      ? navigation.filter((item) => hasMinimumRole(role, item.minRole))
+      : navigation.filter((item) => item.minRole === 'viewer');
 
   return (
     <div className={cn('flex h-full flex-col', className)}>

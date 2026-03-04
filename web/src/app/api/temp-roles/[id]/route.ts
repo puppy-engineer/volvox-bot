@@ -33,7 +33,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'guildId is required' }, { status: 400 });
   }
 
-  const authError = await authorizeGuildRole(request, guildId, 'moderator', LOG_PREFIX);
+  const authError = await authorizeGuildRole(request, guildId, 'admin', LOG_PREFIX);
   if (authError) return authError;
 
   const config = getBotApiConfig(LOG_PREFIX);

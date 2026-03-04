@@ -427,6 +427,9 @@ describe('guilds routes', () => {
       expect(resInfo.body.id).toBe('guild1');
 
       mockFetchGuilds([{ id: 'guild1', name: 'Test', permissions: '0' }]);
+      mockPool.query
+        .mockResolvedValueOnce({ rows: [{ count: 0 }] })
+        .mockResolvedValueOnce({ rows: [{ count: 0 }] });
       const resStats = await request(app)
         .get('/api/v1/guilds/guild1/stats')
         .set('Authorization', `Bearer ${token}`);
