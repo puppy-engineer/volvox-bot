@@ -1,7 +1,7 @@
-# Gitleaks configuration for bills-bot
+# Gitleaks configuration for volvox-bot
 # https://github.com/gitleaks/gitleaks
 
-title = "bills-bot gitleaks config"
+title = "volvox-bot gitleaks config"
 
 # Extend the default ruleset — adds standard rules for AWS, GCP, GitHub tokens, etc.
 [extend]
