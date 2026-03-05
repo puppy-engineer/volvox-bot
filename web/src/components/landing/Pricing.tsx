@@ -20,7 +20,7 @@ const tiers = [
   },
   {
     name: './configure',
-    price: { monthly: 12, annual: 115 },
+    price: { monthly: 14.99, annual: 115 },
     description: 'For growing communities that ship.',
     cta: 'npm install',
     href: null, // Will use bot invite URL
@@ -36,7 +36,7 @@ const tiers = [
   },
   {
     name: 'make install',
-    price: { monthly: 49, annual: 470 },
+    price: { monthly: 49.99, annual: 470 },
     description: 'For communities that mean business.',
     cta: 'curl | bash',
     href: null, // Will use bot invite URL

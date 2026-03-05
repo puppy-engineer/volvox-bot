@@ -244,7 +244,7 @@ export async function seedBuiltinTemplates() {
       `INSERT INTO role_menu_templates
          (name, description, category, created_by_guild_id, is_builtin, is_shared, options)
        VALUES ($1, $2, $3, NULL, TRUE, TRUE, $4::jsonb)
-       ON CONFLICT ON CONSTRAINT idx_rmt_name_guild DO NOTHING`,
+       ON CONFLICT (LOWER(name), COALESCE(created_by_guild_id, '__builtin__')) DO NOTHING`,
       [tpl.name, tpl.description, tpl.category, JSON.stringify(tpl.options)],
     );
   }

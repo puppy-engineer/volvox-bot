@@ -24,24 +24,41 @@ let leakDetectionInterval = null;
  * Selects the SSL configuration for a pg.Pool based on DATABASE_SSL and the connection string.
  *
  * DATABASE_SSL values:
- *   "false" / "off"      → SSL disabled
- *   "no-verify"          → SSL enabled but server certificate not verified
- *   "true" / "on" / unset → SSL enabled with server certificate verification
+ *   "false" / "off" / "disable" → SSL disabled
+ *   "no-verify"                 → SSL enabled but server certificate not verified
+ *   "true" / "on" / "require"   → SSL enabled with server certificate verification
  *
- * Connections whose host contains "railway.internal" always disable SSL.
+ * If DATABASE_SSL is unset, SSL is disabled for local connections and enabled
+ * with full certificate verification for non-local connections.
  *
  * @param {string} connectionString - Database connection URL
  * @returns {false|{rejectUnauthorized: boolean}} `false` to disable SSL, or an object with `rejectUnauthorized` indicating whether server certificates must be verified
  */
 function getSslConfig(connectionString) {
-  // Railway internal connections never need SSL
-  if (connectionString.includes('railway.internal')) {
+  let hostname = '';
+  let sslMode = '';
+
+  try {
+    const connectionUrl = new URL(connectionString);
+    hostname = connectionUrl.hostname.toLowerCase();
+    sslMode = (connectionUrl.searchParams.get('sslmode') || '').toLowerCase().trim();
+  } catch {
+    // Ignore malformed URLs and fall back to safe defaults.
+  }
+
+  // Explicit sslmode=disable in connection string takes precedence.
+  if (sslMode === 'disable' || sslMode === 'off' || sslMode === 'false') {
+    return false;
+  }
+
+  // Railway internal connections never need SSL.
+  if (hostname.includes('railway.internal') || connectionString.includes('railway.internal')) {
     return false;
   }
 
   const sslEnv = (process.env.DATABASE_SSL || '').toLowerCase().trim();
 
-  if (sslEnv === 'false' || sslEnv === 'off') {
+  if (sslEnv === 'false' || sslEnv === 'off' || sslEnv === 'disable' || sslEnv === '0') {
     return false;
   }
 
@@ -49,7 +66,23 @@ function getSslConfig(connectionString) {
     return { rejectUnauthorized: false };
   }
 
-  // Default: SSL with full verification
+  if (sslEnv === 'true' || sslEnv === 'on' || sslEnv === 'require' || sslEnv === '1') {
+    return { rejectUnauthorized: true };
+  }
+
+  // Local development databases commonly run without TLS.
+  if (!sslEnv && ['localhost', '127.0.0.1', '::1'].includes(hostname)) {
+    return false;
+  }
+
+  if (sslEnv) {
+    warn('Unrecognized DATABASE_SSL value, using secure default', {
+      value: sslEnv,
+      source: 'database_ssl',
+    });
+  }
+
+  // Default: SSL with full verification.
   return { rejectUnauthorized: true };
 }
 

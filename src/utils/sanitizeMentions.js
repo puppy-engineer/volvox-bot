@@ -4,7 +4,7 @@
  * Even though allowedMentions is set at the Client level, this ensures
  * the raw text never contains these pings.
  *
- * @see https://github.com/BillChirico/bills-bot/issues/61
+ * @see https://github.com/VolvoxLLC/volvox-bot/issues/61
  */
 
 /**

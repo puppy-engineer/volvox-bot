@@ -7,7 +7,7 @@
  * truncated instead — Discord only allows a single response per interaction
  * method call (reply/editReply/followUp).
  *
- * @see https://github.com/BillChirico/bills-bot/issues/61
+ * @see https://github.com/VolvoxLLC/volvox-bot/issues/61
  */
 
 import { error as logError, warn as logWarn } from '../logger.js';

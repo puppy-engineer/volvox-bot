@@ -227,9 +227,30 @@ describe('db module', () => {
       expect(pgMocks.poolConfig.ssl).toEqual({ rejectUnauthorized: false });
     });
 
-    it('should use rejectUnauthorized: true by default', async () => {
+    it('should disable SSL by default for localhost connections', async () => {
       process.env.DATABASE_URL = 'postgresql://test@localhost/db';
       delete process.env.DATABASE_SSL;
+      await dbModule.initDb();
+      expect(pgMocks.poolConfig.ssl).toBe(false);
+    });
+
+    it('should use rejectUnauthorized: true by default for non-local hosts', async () => {
+      process.env.DATABASE_URL = 'postgresql://test@db.example.com/db';
+      delete process.env.DATABASE_SSL;
+      await dbModule.initDb();
+      expect(pgMocks.poolConfig.ssl).toEqual({ rejectUnauthorized: true });
+    });
+
+    it('should disable SSL when connection string uses sslmode=disable', async () => {
+      process.env.DATABASE_URL = 'postgresql://test@db.example.com/db?sslmode=disable';
+      delete process.env.DATABASE_SSL;
+      await dbModule.initDb();
+      expect(pgMocks.poolConfig.ssl).toBe(false);
+    });
+
+    it('should allow explicit DATABASE_SSL=true override for localhost', async () => {
+      process.env.DATABASE_URL = 'postgresql://test@localhost/db';
+      process.env.DATABASE_SSL = 'true';
       await dbModule.initDb();
       expect(pgMocks.poolConfig.ssl).toEqual({ rejectUnauthorized: true });
     });
