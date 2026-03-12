@@ -46,8 +46,10 @@ export function getDashboardRole(permissions: string | number, owner = false): D
 }
 
 /**
- * Check if the user has at least the required dashboard role.
- * Returns false if either role is invalid or not in the hierarchy.
+ * Determines whether a user's dashboard role meets or exceeds the required role.
+ *
+ * Both parameters are expected to be valid `DashboardRole` values. If a non-standard
+ * value is forced in at runtime, the function safely returns `false`.
  */
 export function hasMinimumRole(userRole: DashboardRole, requiredRole: DashboardRole): boolean {
   const a = DASHBOARD_ROLE_ORDER[userRole as keyof typeof DASHBOARD_ROLE_ORDER];

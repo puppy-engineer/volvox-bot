@@ -1,3 +1,5 @@
+import type { DashboardRole } from '@/lib/dashboard-roles';
+
 export interface DiscordGuild {
   id: string;
   name: string;
@@ -13,8 +15,8 @@ export interface BotGuild {
   icon: string | null;
 }
 
-/** Dashboard role for this guild (viewer, moderator, admin, owner). Set by GET /api/guilds. */
-export type GuildAccessRole = 'viewer' | 'moderator' | 'admin' | 'owner';
+/** Dashboard role for this guild, as returned by GET /api/guilds. */
+export type GuildAccessRole = DashboardRole;
 
 export interface MutualGuild extends DiscordGuild {
   botPresent: boolean;

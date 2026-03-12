@@ -29,6 +29,7 @@ export function useGuildRole(guildId: string | null): {
     }
 
     let cancelled = false;
+    setRole(null);
     setLoading(true);
     setError(false);
 
@@ -43,7 +44,10 @@ export function useGuildRole(guildId: string | null): {
         setRole(data.role);
       })
       .catch(() => {
-        if (!cancelled) setError(true);
+        if (!cancelled) {
+          setError(true);
+          setRole(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

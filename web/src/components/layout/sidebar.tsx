@@ -43,6 +43,8 @@ const navigation: Array<{
   { name: 'Settings', href: '/dashboard/settings', icon: Settings, minRole: 'admin' },
 ];
 
+const viewerNavigation = navigation.filter((item) => item.minRole === 'viewer');
+
 interface SidebarProps {
   className?: string;
   onNavClick?: () => void;
@@ -53,11 +55,15 @@ export function Sidebar({ className, onNavClick }: SidebarProps) {
   const guildId = useGuildSelection();
   const { role, loading, error } = useGuildRole(guildId);
 
-  const visibleNav = loading || (role === null && !error)
-    ? navigation
-    : role !== null
-      ? navigation.filter((item) => hasMinimumRole(role, item.minRole))
-      : navigation.filter((item) => item.minRole === 'viewer');
+  let visibleNav: typeof navigation;
+
+  if (role !== null) {
+    visibleNav = navigation.filter((item) => hasMinimumRole(role, item.minRole));
+  } else if (loading || error) {
+    visibleNav = viewerNavigation;
+  } else {
+    visibleNav = viewerNavigation;
+  }
 
   return (
     <div className={cn('flex h-full flex-col', className)}>
