@@ -87,7 +87,7 @@ export function Header() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <a
-                  href="https://github.com/BillChirico/bills-bot"
+                  href="https://github.com/VolvoxLLC/volvox-bot"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center"

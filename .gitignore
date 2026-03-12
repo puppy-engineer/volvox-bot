@@ -38,5 +38,7 @@ web/.env.local
 web/.env.*.local
 web/tsconfig.tsbuildinfo
 
-# OpenClaw
+# Tools
 openclaw-studio/
+.codex/
+.turbo/
